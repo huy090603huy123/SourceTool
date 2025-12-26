@@ -1,0 +1,38 @@
+name: Build macOS App
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest  # Quan trọng: Thuê máy Mac của GitHub
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        pip install pillow ttkbootstrap pyinstaller
+
+    - name: Build with PyInstaller
+      run: |
+        # Chạy lệnh đóng gói trên máy Mac ảo
+        pyinstaller --noconsole --windowed --name="ImageTool" image_tool1.py
+
+    - name: Create DMG (Optional but recommended)
+      run: |
+        # Nén file .app thành .dmg hoặc .zip để dễ tải về
+        hdiutil create dist/ImageTool.dmg -volname "ImageTool" -srcfolder dist/ImageTool.app
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ImageTool-Mac
+        path: dist/ImageTool.dmg
